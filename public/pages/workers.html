@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Устоҳо — Корбор</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    .search-bar {
+      padding: 16px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 57px;
+      z-index: 40;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 2px solid var(--border);
+      font-size: 15px;
+      outline: none;
+      transition: var(--transition);
+      background: var(--bg);
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+    }
+
+    .filters {
+      padding: 12px 16px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .filters::-webkit-scrollbar { display: none; }
+
+    .filter-chip {
+      padding: 7px 14px;
+      border-radius: 20px;
+      border: 2px solid var(--border);
+      background: var(--card);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: var(--transition);
+      color: var(--text-light);
+    }
+
+    .filter-chip.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .worker-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .worker-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .worker-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #3B82F6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 22px;
+      font-weight: 700;
+      flex-shrink: 0;
+      object-fit: cover;
+    }
+
+    .worker-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .worker-name-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .worker-name {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .worker-rating {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #F59E0B;
+    }
+
+    .worker-region {
+      font-size: 13px;
+      color: var(--text-light);
+      margin-bottom: 8px;
+    }
+
+    .worker-categories {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .category-tag {
+      background: #EFF6FF;
+      color: var(--primary);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .worker-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .worker-status {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .worker-reviews {
+      font-size: 12px;
+      color: var(--text-light);
+    }
+
+    .filter-modal {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--card);
+      border-radius: 24px 24px 0 0;
+      padding: 24px 20px 40px;
+      box-shadow: 0 -8px 32px rgba(0,0,0,0.15);
+      z-index: 200;
+      transform: translateY(100%);
+      transition: var(--transition);
+    }
+
+    .filter-modal.open {
+      transform: translateY(0);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 199;
+      display: none;
+    }
+
+    .modal-overlay.open { display: block; }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="page-header">
+  <a href="javascript:history.back()"
+    style="text-decoration:none;color:var(--text);">←</a>
+  <h1>Устоҳо</h1>
+  <button onclick="openFilter()"
+    style="margin-left:auto;background:var(--bg);border:none;
+    padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;">
+    🔧 Филтр
+  </button>
+</div>
+
+<!-- ҶУСТУҶӮ -->
+<div class="search-bar">
+  <input class="search-input" id="searchInput"
+    placeholder="🔍 Номи усто ё категория..."
+    oninput="handleSearch()" />
+</div>
+
+<!-- КАТЕГОРИЯҲО -->
+<div class="filters" id="categoryFilters">
+  <div class="filter-chip active" onclick="filterByCategory('', this)">Ҳама</div>
+  <div class="filter-chip" onclick="filterByCategory('Кафел', this)">🟦 Кафел</div>
+  <div class="filter-chip" onclick="filterByCategory('Шкатур', this)">🪚 Шкатур</div>
+  <div class="filter-chip" onclick="filterByCategory('Сантехника', this)">🚿 Сантехника</div>
+  <div class="filter-chip" onclick="filterByCategory('Барқ', this)">⚡ Барқ</div>
+  <div class="filter-chip" onclick="filterByCategory('Гаҷкорӣ', this)">🏗️ Гаҷкорӣ</div>
+  <div class="filter-chip" onclick="filterByCategory('Рангкорӣ', this)">🎨 Рангкорӣ</div>
+  <div class="filter-chip" onclick="filterByCategory('Стяжка', this)">🧱 Стяжка</div>
+</div>
+
+<!-- РӮЙХАТИ УСТОҲО -->
+<div class="page-content" id="workersList">
+  <div class="loading"><div class="spinner"></div></div>
+</div>
+
+<!-- ФИЛТРИ МИНТАҚА -->
+<div class="modal-overlay" id="overlay" onclick="closeFilter()"></div>
+<div class="filter-modal" id="filterModal">
+  <div class="modal-title">Филтр</div>
+  <div class="form-group">
+    <label>Минтақа</label>
+    <select id="regionFilter">
+      <option value="">Ҳама минтақаҳо</option>
+      <option value="Душанбе">Душанбе</option>
+      <option value="Хуҷанд">Хуҷанд</option>
+      <option value="Бохтар">Бохтар</option>
+      <option value="Кӯлоб">Кӯлоб</option>
+      <option value="Исфара">Исфара</option>
+      <option value="Конибодом">Конибодом</option>
+      <option value="Ӯротеппа">Ӯротеппа</option>
+      <option value="Норак">Норак</option>
+      <option value="Турсунзода">Турсунзода</option>
+      <option value="Ҳисор">Ҳисор</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>Статус</label>
+    <select id="statusFilter">
+      <option value="">Ҳама</option>
+      <option value="Озод">🟢 Озод</option>
+      <option value="Банд">🔴 Банд</option>
+    </select>
+  </div>
+  <button class="btn btn-primary" onclick="applyFilter()">
+    Татбиқ кардан
+  </button>
+</div>
+
+<!-- НАВБАРИ ПОЁН -->
+<nav class="bottom-nav">
+  <a href="/pages/customer-dashboard.html">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+    </svg>
+    Асосӣ
+  </a>
+  <a href="/pages/workers.html" class="active">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+    </svg>
+    Устоҳо
+  </a>
+  <a href="/pages/my-orders.html">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2"/>
+    </svg>
+    Фармоишҳо
+  </a>
+  <a href="/pages/chats.html">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+    </svg>
+    Чатҳо
+  </a>
+</nav>
+
+<script src="/js/api.js"></script>
+<script>
+  if (!isLoggedIn()) window.location.href = '/';
+
+  let allWorkers = [];
+  let currentCategory = '';
+  let currentRegion = '';
+  let currentStatus = '';
+
+  const loadWorkers = async () => {
+    try {
+      allWorkers = await API.getAllWorkers();
+      renderWorkers(allWorkers);
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
+  const renderWorkers = (workers) => {
+    const list = document.getElementById('workersList');
+
+    if (workers.length === 0) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857"/>
+          </svg>
+          <h3>Устоҳо ёфт нашуд</h3>
+          <p>Филтрро дигар кунед</p>
+        </div>`;
+      return;
+    }
+
+    list.innerHTML = workers.map(w => `
+      <div class="worker-card fade-in"
+        onclick="location.href='/pages/worker-public.html?id=${w.user._id}'">
+        <div class="worker-avatar">
+          ${w.user.avatar
+            ? `<img src="${w.user.avatar}" style="width:56px;height:56px;
+               border-radius:50%;object-fit:cover;" />`
+            : w.user.name.charAt(0)}
+        </div>
+        <div class="worker-info">
+          <div class="worker-name-row">
+            <span class="worker-name">${w.user.name}</span>
+            <span class="worker-rating">
+              ★ ${w.rating ? w.rating.toFixed(1) : '0.0'}
+            </span>
+          </div>
+          <div class="worker-region">📍 ${w.user.region}</div>
+          <div class="worker-categories">
+            ${w.categories.slice(0, 3).map(c =>
+              `<span class="category-tag">${c}</span>`
+            ).join('')}
+            ${w.categories.length > 3
+              ? `<span class="category-tag">+${w.categories.length - 3}</span>`
+              : ''}
+          </div>
+          <div class="worker-footer">
+            <span class="worker-status ${w.status === 'Озод'
+              ? 'badge-success' : 'badge-danger'}" 
+              style="padding:3px 10px;border-radius:20px;
+              background:${w.status === 'Озод' ? '#DCFCE7' : '#FEE2E2'};">
+              ${w.status === 'Озод' ? '🟢 Озод' : '🔴 Банд'}
+            </span>
+            <span class="worker-reviews">
+              ${w.reviewCount || 0} отзыв
+            </span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  };
+
+  const filterByCategory = (category, el) => {
+    currentCategory = category;
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    applyAllFilters();
+  };
+
+  const handleSearch = () => {
+    applyAllFilters();
+  };
+
+  const applyAllFilters = () => {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    let filtered = allWorkers;
+
+    if (currentCategory) {
+      filtered = filtered.filter(w =>
+        w.categories.includes(currentCategory));
+    }
+
+    if (currentRegion) {
+      filtered = filtered.filter(w =>
+        w.user.region === currentRegion);
+    }
+
+    if (currentStatus) {
+      filtered = filtered.filter(w => w.status === currentStatus);
+    }
+
+    if (search) {
+      filtered = filtered.filter(w =>
+        w.user.name.toLowerCase().includes(search) ||
+        w.categories.some(c => c.toLowerCase().includes(search)));
+    }
+
+    renderWorkers(filtered);
+  };
+
+  const openFilter = () => {
+    document.getElementById('filterModal').classList.add('open');
+    document.getElementById('overlay').classList.add('open');
+  };
+
+  const closeFilter = () => {
+    document.getElementById('filterModal').classList.remove('open');
+    document.getElementById('overlay').classList.remove('open');
+  };
+
+  const applyFilter = () => {
+    currentRegion = document.getElementById('regionFilter').value;
+    currentStatus = document.getElementById('statusFilter').value;
+    closeFilter();
+    applyAllFilters();
+  };
+
+  loadWorkers();
+</script>
+
+</body>
+</html>

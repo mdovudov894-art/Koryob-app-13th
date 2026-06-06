@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Баҳо гузоштан — Корбор</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    .review-hero {
+      background: linear-gradient(135deg, #1E3A8A, #2563EB);
+      padding: 40px 20px;
+      text-align: center;
+      color: white;
+    }
+
+    .review-hero h2 {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .review-hero p {
+      font-size: 15px;
+      opacity: 0.85;
+    }
+
+    .worker-preview {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .worker-preview-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 22px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .worker-preview-name {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .worker-preview-cat {
+      font-size: 13px;
+      color: var(--text-light);
+      margin-top: 3px;
+    }
+
+    .stars-selector {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 24px 0;
+    }
+
+    .star-btn {
+      font-size: 44px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+      color: var(--border);
+      line-height: 1;
+    }
+
+    .star-btn.active {
+      color: #F59E0B;
+      transform: scale(1.2);
+    }
+
+    .star-btn:hover {
+      transform: scale(1.15);
+    }
+
+    .stars-label {
+      text-align: center;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 20px;
+      min-height: 24px;
+    }
+
+    .upload-area {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .upload-area:hover {
+      border-color: var(--primary);
+      background: #EFF6FF;
+    }
+
+    .upload-area p {
+      font-size: 13px;
+      color: var(--text-light);
+      margin-top: 6px;
+    }
+
+    .preview-img {
+      width: 100%;
+      border-radius: 12px;
+      margin-top: 12px;
+      max-height: 200px;
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="page-header">
+  <a href="javascript:history.back()"
+    style="text-decoration:none;color:var(--text);">←</a>
+  <h1>Баҳо гузоштан</h1>
+</div>
+
+<!-- ГЕРОЙ -->
+<div class="review-hero">
+  <h2>Кор чӣ хел шуд? ⭐</h2>
+  <p>Баҳои шумо дигар фармоишгаронро кӯмак мекунад</p>
+</div>
+
+<div class="page-content">
+
+  <!-- УСТО -->
+  <div class="worker-preview" id="workerPreview">
+    <div class="loading"><div class="spinner"></div></div>
+  </div>
+
+  <!-- СИТОРАҲО -->
+  <div class="card">
+    <p style="text-align:center;font-size:15px;font-weight:600;
+      margin-bottom:4px;">Баҳо диҳед</p>
+
+    <div class="stars-selector">
+      <span class="star-btn" onclick="setStar(1)">★</span>
+      <span class="star-btn" onclick="setStar(2)">★</span>
+      <span class="star-btn" onclick="setStar(3)">★</span>
+      <span class="star-btn" onclick="setStar(4)">★</span>
+      <span class="star-btn" onclick="setStar(5)">★</span>
+    </div>
+
+    <div class="stars-label" id="starsLabel">Ситораро интихоб кунед</div>
+
+    <div class="form-group">
+      <label>Изоҳ (ихтиёрӣ)</label>
+      <textarea id="comment"
+        placeholder="Масалан: Усто хуб кор кард, вақтида тамом шуд...">
+      </textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Сурати натиҷа (ихтиёрӣ)</label>
+      <div class="upload-area"
+        onclick="document.getElementById('photoInput').click()">
+        <div style="font-size:28px;">📷</div>
+        <p>Суратҳои кори тайёрро илова кунед</p>
+      </div>
+      <input type="file" id="photoInput" accept="image/*"
+        style="display:none" onchange="previewPhoto(this)" />
+      <img id="photoPreview" class="preview-img" style="display:none;" />
+    </div>
+
+    <button class="btn btn-primary" onclick="submitReview()" id="submitBtn">
+      ⭐ Баҳо фиристодан
+    </button>
+  </div>
+
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+  if (!isLoggedIn()) window.location.href = '/';
+  const user = getUser();
+  if (user.role !== 'customer') window.location.href = '/';
+
+  const params = new URLSearchParams(window.location.search);
+  const workerId = params.get('workerId');
+  const orderId = params.get('orderId');
+  const workerName = params.get('workerName') || 'Усто';
+  const category = params.get('category') || '';
+
+  if (!workerId || !orderId) window.location.href = '/';
+
+  // Устои нишон додан
+  document.getElementById('workerPreview').innerHTML = `
+    <div class="worker-preview-avatar">${workerName.charAt(0)}</div>
+    <div>
+      <div class="worker-preview-name">${workerName}</div>
+      <div class="worker-preview-cat">📋 ${category}</div>
+    </div>`;
+
+  let selectedStar = 0;
+
+  const STAR_LABELS = {
+    1: '😞 Хеле бад',
+    2: '😕 Бад',
+    3: '😐 Миёна',
+    4: '😊 Хуб',
+    5: '🤩 Аъло!'
+  };
+
+  const setStar = (num) => {
+    selectedStar = num;
+    document.querySelectorAll('.star-btn').forEach((btn, i) => {
+      btn.classList.toggle('active', i < num);
+    });
+    document.getElementById('starsLabel').textContent = STAR_LABELS[num];
+  };
+
+  const previewPhoto = (input) => {
+    if (!input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = document.getElementById('photoPreview');
+      img.src = e.target.result;
+      img.style.display = 'block';
+    };
+    reader.readAsDataURL(input.files[0]);
+  };
+
+  const submitReview = async () => {
+    if (selectedStar === 0) {
+      showToast('Ситораро интихоб кунед!', 'error');
+      return;
+    }
+
+    const comment = document.getElementById('comment').value.trim();
+    const photo = document.getElementById('photoInput').files[0];
+    const btn = document.getElementById('submitBtn');
+
+    btn.textContent = 'Интизор шавед...';
+    btn.disabled = true;
+
+    try {
+      const formData = new FormData();
+      formData.append('workerId', workerId);
+      formData.append('orderId', orderId);
+      formData.append('stars', selectedStar);
+      formData.append('comment', comment);
+      if (photo) formData.append('photo', photo);
+
+      await API.createReview(formData);
+      showToast('✅ Баҳо фиристода шуд!', 'success');
+
+      setTimeout(() => {
+        window.location.href = '/pages/my-orders.html';
+      }, 1500);
+    } catch (err) {
+      showToast(err.message, 'error');
+      btn.textContent = '⭐ Баҳо фиристодан';
+      btn.disabled = false;
+    }
+  };
+</script>
+
+</body>
+</html>

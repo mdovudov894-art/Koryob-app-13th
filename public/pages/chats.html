@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Чатҳо — Корбор</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    .chat-item {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .chat-item:hover { transform: translateY(-2px); }
+
+    .chat-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #3B82F6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 20px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .chat-info { flex: 1; min-width: 0; }
+
+    .chat-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .chat-name {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .chat-time {
+      font-size: 12px;
+      color: var(--text-light);
+    }
+
+    .chat-order {
+      font-size: 13px;
+      color: var(--primary);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .chat-last {
+      font-size: 13px;
+      color: var(--text-light);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .unread-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--primary);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="page-header">
+  <h1>💬 Чатҳо</h1>
+</div>
+
+<!-- РӮЙХАТИ ЧАТҲО -->
+<div class="page-content" id="chatsList">
+  <div class="loading"><div class="spinner"></div></div>
+</div>
+
+<!-- НАВБАРИ ПОЁН -->
+<nav class="bottom-nav" id="bottomNav"></nav>
+
+<script src="/js/api.js"></script>
+<script>
+  if (!isLoggedIn()) window.location.href = '/';
+  const user = getUser();
+
+  // Навбари поёнро аз рӯи рол нишон додан
+  const isWorker = user.role === 'worker';
+  document.getElementById('bottomNav').innerHTML = isWorker ? `
+    <a href="/pages/worker-dashboard.html">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+      </svg>
+      Асосӣ
+    </a>
+    <a href="/pages/available-orders.html">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2"/>
+      </svg>
+      Эълонҳо
+    </a>
+    <a href="/pages/worker-profile.html">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+      </svg>
+      Профил
+    </a>
+    <a href="/pages/chats.html" class="active">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+      </svg>
+      Чатҳо
+    </a>` : `
+    <a href="/pages/customer-dashboard.html">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+      </svg>
+      Асосӣ
+    </a>
+    <a href="/pages/workers.html">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+      </svg>
+      Устоҳо
+    </a>
+    <a href="/pages/my-orders.html">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2"/>
+      </svg>
+      Фармоишҳо
+    </a>
+    <a href="/pages/chats.html" class="active">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+      </svg>
+      Чатҳо
+    </a>`;
+
+  const loadChats = async () => {
+    try {
+      const chats = await API.getMyChats();
+      const list = document.getElementById('chatsList');
+
+      if (chats.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8"/>
+            </svg>
+            <h3>Чатҳо нест</h3>
+            <p>Пас аз интихоби усто чат кушода мешавад</p>
+          </div>`;
+        return;
+      }
+
+      list.innerHTML = chats.map(chat => {
+        const other = chat.sender._id === user.id
+          ? chat.receiver : chat.sender;
+        const isUnread = !chat.isRead && chat.receiver._id === user.id;
+
+        return `
+          <div class="chat-item fade-in"
+            onclick="location.href='/pages/chat.html?orderId=${chat.order._id}&userId=${other._id}'">
+            <div class="chat-avatar">${other.name.charAt(0)}</div>
+            <div class="chat-info">
+              <div class="chat-top">
+                <span class="chat-name">${other.name}</span>
+                <span class="chat-time">
+                  ${new Date(chat.createdAt).toLocaleDateString('tg-TJ')}
+                </span>
+              </div>
+              <div class="chat-order">📋 ${chat.order.category}</div>
+              <div class="chat-last">
+                ${chat.image ? '📷 Сурат' : chat.text || '...'}
+              </div>
+            </div>
+            ${isUnread ? '<div class="unread-dot"></div>' : ''}
+          </div>`;
+      }).join('');
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
+  loadChats();
+</script>
+
+</body>
+</html>

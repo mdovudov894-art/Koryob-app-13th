@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Кабинет — Корбор</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    body{font-family:'Inter',sans-serif;background:#F5F5FF;min-height:100vh;padding-bottom:90px}
+
+    /* HEADER */
+    .header{
+      background:linear-gradient(145deg,#0F0C29,#302B63,#6C63FF);
+      padding:20px 20px 80px;position:relative;overflow:hidden;
+    }
+
+    .header::before{
+      content:'';position:absolute;
+      width:300px;height:300px;
+      background:rgba(255,101,132,0.2);
+      border-radius:50%;filter:blur(60px);
+      top:-100px;right:-80px;
+    }
+
+    .header::after{
+      content:'';position:absolute;
+      width:200px;height:200px;
+      background:rgba(67,233,123,0.15);
+      border-radius:50%;filter:blur(50px);
+      bottom:-60px;left:-40px;
+    }
+
+    .header-top{
+      display:flex;align-items:center;
+      justify-content:space-between;
+      margin-bottom:24px;position:relative;z-index:2;
+    }
+
+    .app-name{
+      font-size:22px;font-weight:900;color:white;
+      letter-spacing:-0.5px;
+    }
+
+    .app-name span{
+      background:linear-gradient(135deg,#A78BFA,#FF6584);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+
+    .logout-btn{
+      background:rgba(255,255,255,0.1);
+      backdrop-filter:blur(10px);
+      border:1px solid rgba(255,255,255,0.2);
+      color:white;padding:8px 16px;
+      border-radius:20px;cursor:pointer;
+      font-size:13px;font-weight:600;
+      font-family:'Inter',sans-serif;
+      transition:all 0.2s;
+    }
+    .logout-btn:hover{background:rgba(255,255,255,0.2)}
+
+    .user-row{
+      display:flex;align-items:center;gap:16px;
+      position:relative;z-index:2;
+    }
+
+    .user-avatar{
+      width:60px;height:60px;border-radius:20px;
+      background:linear-gradient(135deg,#6C63FF,#FF6584);
+      display:flex;align-items:center;justify-content:center;
+      font-size:24px;font-weight:800;color:white;
+      box-shadow:0 8px 24px rgba(108,99,255,0.4);
+      flex-shrink:0;
+    }
+
+    .user-info h3{font-size:20px;font-weight:800;color:white}
+    .user-info p{font-size:13px;color:rgba(255,255,255,0.6);margin-top:3px}
+
+    .notification-badge{
+      margin-left:auto;
+      background:linear-gradient(135deg,#FF6584,#FF8C69);
+      color:white;width:32px;height:32px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-size:16px;
+      box-shadow:0 4px 12px rgba(255,101,132,0.4);
+    }
+
+    /* STATS */
+    .stats-row{
+      display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;
+      margin:-44px 16px 0;position:relative;z-index:10;
+    }
+
+    .stat-card{
+      background:white;border-radius:20px;padding:16px 12px;
+      text-align:center;
+      box-shadow:0 8px 32px rgba(108,99,255,0.12);
+      animation:slideUp 0.5s ease both;
+    }
+
+    .stat-card:nth-child(2){animation-delay:0.1s}
+    .stat-card:nth-child(3){animation-delay:0.2s}
+
+    @keyframes slideUp{
+      from{opacity:0;transform:translateY(20px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+
+    .stat-icon{
+      width:36px;height:36px;border-radius:10px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:16px;margin:0 auto 8px;
+    }
+
+    .si1{background:linear-gradient(135deg,#EEF0FF,#DDD6FF)}
+    .si2{background:linear-gradient(135deg,#D1FAE5,#A7F3D0)}
+    .si3{background:linear-gradient(135deg,#FEF3C7,#FDE68A)}
+
+    .stat-num{font-size:22px;font-weight:900;color:#1A1D2E}
+    .stat-label{font-size:11px;color:#9CA3AF;margin-top:2px;font-weight:600}
+
+    /* CONTENT */
+    .content{padding:24px 16px 0}
+
+    .section-title{
+      font-size:18px;font-weight:800;color:#1A1D2E;
+      margin-bottom:16px;
+    }
+
+    /* QUICK ACTIONS */
+    .actions-grid{
+      display:grid;grid-template-columns:1fr 1fr;gap:12px;
+      margin-bottom:28px;
+    }
+
+    .action-card{
+      background:white;border-radius:20px;padding:20px 16px;
+      text-decoration:none;display:block;
+      box-shadow:0 4px 20px rgba(108,99,255,0.08);
+      transition:all 0.3s ease;
+      position:relative;overflow:hidden;
+    }
+
+    .action-card::before{
+      content:'';position:absolute;
+      top:0;left:0;right:0;height:3px;
+      border-radius:20px 20px 0 0;
+    }
+
+    .action-card.c1::before{background:linear-gradient(135deg,#6C63FF,#8B5CF6)}
+    .action-card.c2::before{background:linear-gradient(135deg,#10B981,#34D399)}
+    .action-card.c3::before{background:linear-gradient(135deg,#F59E0B,#FBBF24)}
+    .action-card.c4::before{background:linear-gradient(135deg,#EF4444,#F87171)}
+
+    .action-card:hover{
+      transform:translateY(-4px);
+      box-shadow:0 12px 32px rgba(108,99,255,0.15);
+    }
+
+    .action-emoji{
+      font-size:32px;margin-bottom:12px;display:block;
+    }
+
+    .action-title{
+      font-size:14px;font-weight:800;color:#1A1D2E;margin-bottom:4px;
+    }
+
+    .action-desc{font-size:12px;color:#9CA3AF;font-weight:500}
+
+    /* ORDER CARDS */
+    .order-card{
+      background:white;border-radius:20px;
+      padding:18px;margin-bottom:12px;
+      box-shadow:0 4px 20px rgba(108,99,255,0.08);
+      cursor:pointer;transition:all 0.3s ease;
+      animation:slideUp 0.4s ease both;
+    }
+
+    .order-card:hover{
+      transform:translateY(-3px);
+      box-shadow:0 12px 32px rgba(108,99,255,0.15);
+    }
+
+    .order-top{
+      display:flex;align-items:center;
+      justify-content:space-between;margin-bottom:10px;
+    }
+
+    .order-cat{
+      display:flex;align-items:center;gap:8px;
+      font-size:15px;font-weight:800;color:#1A1D2E;
+    }
+
+    .cat-dot{
+      width:8px;height:8px;border-radius:50%;
+      background:linear-gradient(135deg,#6C63FF,#8B5CF6);
+    }
+
+    .badge{
+      padding:5px 12px;border-radius:20px;
+      font-size:11px;font-weight:700;letter-spacing:0.3px;
+    }
+
+    .badge-active{
+      background:linear-gradient(135deg,#D1FAE5,#A7F3D0);color:#065F46;
+    }
+
+    .badge-done{
+      background:linear-gradient(135deg,#EEF0FF,#DDD6FF);color:#4C1D95;
+    }
+
+    .badge-closed{
+      background:linear-gradient(135deg,#FEE2E2,#FECACA);color:#991B1B;
+    }
+
+    .order-desc{
+      font-size:13px;color:#6B7280;margin-bottom:12px;
+      line-height:1.6;
+      display:-webkit-box;-webkit-line-clamp:2;
+      -webkit-box-orient:vertical;overflow:hidden;
+    }
+
+    .order-footer{
+      display:flex;align-items:center;
+      justify-content:space-between;
+      padding-top:12px;border-top:1px solid #F5F5FF;
+    }
+
+    .order-meta{
+      display:flex;gap:10px;font-size:12px;color:#9CA3AF;font-weight:500;
+    }
+
+    .resp-badge{
+      background:#EEF0FF;color:#6C63FF;
+      padding:4px 10px;border-radius:20px;
+      font-size:12px;font-weight:700;
+    }
+
+    /* BOTTOM NAV */
+    .bottom-nav{
+      position:fixed;bottom:0;left:0;right:0;
+      background:rgba(255,255,255,0.97);
+      backdrop-filter:blur(20px);
+      border-top:1px solid rgba(108,99,255,0.08);
+      display:flex;padding:10px 0 20px;z-index:100;
+      box-shadow:0 -8px 32px rgba(108,99,255,0.08);
+    }
+
+    .nav-item{
+      flex:1;display:flex;flex-direction:column;
+      align-items:center;gap:4px;
+      text-decoration:none;color:#9CA3AF;
+      font-size:11px;font-weight:600;
+      transition:all 0.2s;padding:4px 0;
+    }
+
+    .nav-item.active{color:#6C63FF}
+
+    .nav-icon{
+      width:28px;height:28px;
+      display:flex;align-items:center;justify-content:center;
+    }
+
+    .nav-item.active .nav-icon-wrap{
+      background:linear-gradient(135deg,#EEF0FF,#DDD6FF);
+      border-radius:10px;padding:6px;
+    }
+
+    .empty-state{
+      text-align:center;padding:50px 20px;
+    }
+
+    .empty-icon{
+      font-size:56px;margin-bottom:16px;
+    }
+
+    .empty-state h3{
+      font-size:17px;font-weight:800;
+      color:#1A1D2E;margin-bottom:8px;
+    }
+
+    .empty-state p{font-size:14px;color:#9CA3AF}
+
+    .spinner{
+      width:36px;height:36px;
+      border:3px solid #EEF0FF;
+      border-top-color:#6C63FF;
+      border-radius:50%;
+      animation:spin 0.7s linear infinite;
+      margin:60px auto;display:block;
+    }
+
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .toast{
+      position:fixed;bottom:90px;left:50%;
+      transform:translateX(-50%) translateY(20px);
+      padding:14px 24px;border-radius:14px;
+      font-size:14px;font-weight:600;color:white;
+      opacity:0;transition:all 0.3s ease;z-index:999;
+      white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,0.2);
+      font-family:'Inter',sans-serif;
+    }
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .toast.success{background:linear-gradient(135deg,#10B981,#059669)}
+    .toast.error{background:linear-gradient(135deg,#EF4444,#DC2626)}
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div class="app-name">Кор<span>бор</span></div>
+    <button class="logout-btn" onclick="logout()">Баромад</button>
+  </div>
+  <div class="user-row">
+    <div class="user-avatar" id="userInitial">?</div>
+    <div class="user-info">
+      <h3 id="userName">...</h3>
+      <p id="userRegion">...</p>
+    </div>
+    <div class="notification-badge">🔔</div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-icon si1">📋</div>
+    <div class="stat-num" id="activeCount">0</div>
+    <div class="stat-label">Актив</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon si2">✅</div>
+    <div class="stat-num" id="doneCount">0</div>
+    <div class="stat-label">Иҷрошуда</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon si3">💬</div>
+    <div class="stat-num" id="chatCount">0</div>
+    <div class="stat-label">Чатҳо</div>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <div class="section-title">Чӣ кор мекунед? 👇</div>
+
+  <div class="actions-grid">
+    <a href="/pages/create-order.html" class="action-card c1">
+      <span class="action-emoji">📋</span>
+      <div class="action-title">Фармоиш додан</div>
+      <div class="action-desc">Эълон гузоред</div>
+    </a>
+    <a href="/pages/workers.html" class="action-card c2">
+      <span class="action-emoji">🔍</span>
+      <div class="action-title">Усто ёфтан</div>
+      <div class="action-desc">Каталоги устоҳо</div>
+    </a>
+    <a href="/pages/my-orders.html" class="action-card c3">
+      <span class="action-emoji">📦</span>
+      <div class="action-title">Фармоишҳоям</div>
+      <div class="action-desc">Таърихи корҳо</div>
+    </a>
+    <a href="/pages/chats.html" class="action-card c4">
+      <span class="action-emoji">💬</span>
+      <div class="action-title">Чатҳо</div>
+      <div class="action-desc">Паёмҳои ман</div>
+    </a>
+  </div>
+
+  <div class="section-title">Фармоишҳои охирон</div>
+
+  <div id="ordersList">
+    <div class="spinner"></div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <a href="/pages/customer-dashboard.html" class="nav-item active">
+    <div class="nav-icon-wrap nav-icon">
+      <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+          d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+      </svg>
+    </div>
+    Асосӣ
+  </a>
+  <a href="/pages/workers.html" class="nav-item">
+    <div class="nav-icon">
+      <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+      </svg>
+    </div>
+    Устоҳо
+  </a>
+  <a href="/pages/my-orders.html" class="nav-item">
+    <div class="nav-icon">
+      <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2"/>
+      </svg>
+    </div>
+    Фармоишҳо
+  </a>
+  <a href="/pages/chats.html" class="nav-item">
+    <div class="nav-icon">
+      <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+      </svg>
+    </div>
+    Чатҳо
+  </a>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script src="/js/api.js"></script>
+<script>
+  if(!isLoggedIn()) window.location.href='/';
+  const user=getUser();
+  if(user.role!=='customer') window.location.href='/pages/worker-dashboard.html';
+
+  document.getElementById('userName').textContent=user.name;
+  document.getElementById('userRegion').textContent='📍 '+user.region;
+  document.getElementById('userInitial').textContent=user.name.charAt(0).toUpperCase();
+
+  const showMsg=(msg,type)=>{
+    const t=document.getElementById('toast');
+    t.textContent=msg;t.className=`toast ${type} show`;
+    setTimeout(()=>t.classList.remove('show'),3000);
+  }
+
+  const loadOrders=async()=>{
+    try{
+      const orders=await API.getMyOrders();
+      const active=orders.filter(o=>o.status==='Актив').length;
+      const done=orders.filter(o=>o.status==='Иҷрошуда').length;
+      document.getElementById('activeCount').textContent=active;
+      document.getElementById('doneCount').textContent=done;
+
+      const list=document.getElementById('ordersList');
+
+      if(orders.length===0){
+        list.innerHTML=`
+          <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <h3>Фармоишҳо нест</h3>
+            <p>Аввалин фармоишатонро гузоред!</p>
+          </div>`;
+        return;
+      }
+
+      list.innerHTML=orders.slice(0,5).map((o,i)=>`
+        <div class="order-card" style="animation-delay:${i*0.1}s"
+          onclick="location.href='/pages/order-detail.html?id=${o._id}'">
+          <div class="order-top">
+            <div class="order-cat">
+              <div class="cat-dot"></div>
+              ${o.category}
+            </div>
+            <span class="badge ${o.status==='Актив'?'badge-active':
+              o.status==='Иҷрошуда'?'badge-done':'badge-closed'}">
+              ${o.status}
+            </span>
+          </div>
+          <p class="order-desc">${o.description}</p>
+          <div class="order-footer">
+            <div class="order-meta">
+              <span>📍 ${o.address}</span>
+              <span>⏰ ${o.deadline}</span>
+            </div>
+            <span class="resp-badge">💬 ${o.responses.length}</span>
+          </div>
+        </div>
+      `).join('');
+    }catch(err){
+      showMsg(err.message,'error');
+    }
+  }
+
+  loadOrders();
+</script>
+</body>
+</html>

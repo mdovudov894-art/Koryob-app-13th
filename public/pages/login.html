@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Дохил шудан — Корбор</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    body{font-family:'Inter',sans-serif;min-height:100vh;background:#F5F5FF;overflow-x:hidden}
+
+    .top-bar{
+      background:linear-gradient(145deg,#0F0C29,#302B63);
+      padding:50px 24px 70px;
+      position:relative;overflow:hidden;
+    }
+
+    .top-bar::before{
+      content:'';position:absolute;
+      width:250px;height:250px;
+      background:linear-gradient(135deg,#6C63FF,#FF6584);
+      border-radius:50%;opacity:0.15;filter:blur(60px);
+      top:-80px;right:-60px;
+    }
+
+    .top-bar::after{
+      content:'';position:absolute;
+      width:180px;height:180px;
+      background:#43E97B;
+      border-radius:50%;opacity:0.1;filter:blur(50px);
+      bottom:-40px;left:-30px;
+    }
+
+    .back-btn{
+      display:inline-flex;align-items:center;gap:8px;
+      color:rgba(255,255,255,0.7);text-decoration:none;
+      font-size:14px;font-weight:600;
+      position:relative;z-index:2;margin-bottom:28px;
+      transition:color 0.2s;
+    }
+    .back-btn:hover{color:white}
+
+    .top-content{position:relative;z-index:2}
+
+    .logo-small{
+      width:52px;height:52px;
+      background:linear-gradient(135deg,#6C63FF,#8B5CF6);
+      border-radius:16px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:24px;font-weight:900;color:white;
+      margin-bottom:20px;
+      box-shadow:0 8px 24px rgba(108,99,255,0.4);
+    }
+
+    .top-content h1{
+      font-size:28px;font-weight:800;color:white;margin-bottom:8px;
+    }
+
+    .top-content p{
+      font-size:15px;color:rgba(255,255,255,0.6);font-weight:500;
+    }
+
+    .form-card{
+      margin:-36px 16px 0;
+      background:white;
+      border-radius:28px;
+      padding:32px 24px;
+      box-shadow:0 20px 60px rgba(108,99,255,0.12);
+      position:relative;z-index:10;
+      animation:slideUp 0.5s cubic-bezier(0.4,0,0.2,1) both;
+    }
+
+    @keyframes slideUp{
+      from{opacity:0;transform:translateY(30px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+
+    .input-group{margin-bottom:18px}
+
+    .input-group label{
+      display:block;font-size:12px;font-weight:700;
+      color:#9CA3AF;text-transform:uppercase;
+      letter-spacing:0.8px;margin-bottom:8px;
+    }
+
+    .input-wrap{position:relative}
+
+    .input-icon{
+      position:absolute;left:16px;top:50%;transform:translateY(-50%);
+      font-size:18px;
+    }
+
+    .input-wrap input{
+      width:100%;padding:16px 16px 16px 48px;
+      border:2px solid #F0F0FF;border-radius:14px;
+      font-size:15px;font-weight:500;color:#1A1D2E;
+      font-family:'Inter',sans-serif;outline:none;
+      background:#FAFAFF;transition:all 0.3s ease;
+    }
+
+    .input-wrap input:focus{
+      border-color:#6C63FF;background:white;
+      box-shadow:0 0 0 4px rgba(108,99,255,0.1);
+    }
+
+    .input-wrap input::placeholder{color:#C4C9D4;font-weight:400}
+
+    .btn-login{
+      width:100%;padding:17px;
+      background:linear-gradient(135deg,#6C63FF,#8B5CF6);
+      color:white;border:none;border-radius:14px;
+      font-size:16px;font-weight:700;cursor:pointer;
+      font-family:'Inter',sans-serif;
+      box-shadow:0 8px 24px rgba(108,99,255,0.4);
+      transition:all 0.3s ease;margin-top:8px;
+      display:flex;align-items:center;justify-content:center;gap:8px;
+    }
+
+    .btn-login:hover{
+      transform:translateY(-2px);
+      box-shadow:0 12px 32px rgba(108,99,255,0.5);
+    }
+
+    .btn-login:disabled{opacity:0.7;transform:none}
+
+    .divider{
+      display:flex;align-items:center;gap:12px;
+      margin:24px 0;color:#C4C9D4;font-size:13px;font-weight:600;
+    }
+
+    .divider::before,.divider::after{
+      content:'';flex:1;height:1px;background:#F0F0F0;
+    }
+
+    .register-link{
+      width:100%;padding:16px;
+      background:#F5F5FF;color:#6C63FF;
+      border:2px solid #E8E6FF;border-radius:14px;
+      font-size:15px;font-weight:700;cursor:pointer;
+      font-family:'Inter',sans-serif;
+      text-decoration:none;display:flex;
+      align-items:center;justify-content:center;
+      transition:all 0.3s ease;
+    }
+
+    .register-link:hover{background:#EEEEFF;border-color:#6C63FF}
+
+    .toast{
+      position:fixed;bottom:30px;left:50%;
+      transform:translateX(-50%) translateY(20px);
+      padding:14px 24px;border-radius:14px;
+      font-size:14px;font-weight:600;color:white;
+      opacity:0;transition:all 0.3s ease;z-index:999;
+      white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,0.2);
+      font-family:'Inter',sans-serif;
+    }
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .toast.success{background:linear-gradient(135deg,#10B981,#059669)}
+    .toast.error{background:linear-gradient(135deg,#EF4444,#DC2626)}
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="/" class="back-btn">← Орқа</a>
+  <div class="top-content">
+    <div class="logo-small">К</div>
+    <h1>Хуш омадед! 👋</h1>
+    <p>Рақами телефон ва паролатонро ворид кунед</p>
+  </div>
+</div>
+
+<div class="form-card">
+  <div class="input-group">
+    <label>Рақами телефон</label>
+    <div class="input-wrap">
+      <span class="input-icon">📱</span>
+      <input type="tel" id="phone" placeholder="+992 XX XXX XXXX"/>
+    </div>
+  </div>
+
+  <div class="input-group">
+    <label>Парол</label>
+    <div class="input-wrap">
+      <span class="input-icon">🔒</span>
+      <input type="password" id="password" placeholder="Паролатонро ворид кунед"/>
+    </div>
+  </div>
+
+  <button class="btn-login" onclick="handleLogin()" id="loginBtn">
+    Дохил шудан →
+  </button>
+
+  <div class="divider">ё</div>
+
+  <a href="/pages/register.html" class="register-link">
+    Акаунти нав сохтан
+  </a>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/js/api.js"></script>
+<script>
+  if(isLoggedIn()){
+    const u=getUser();
+    window.location.href=u.role==='worker'
+      ?'/pages/worker-dashboard.html'
+      :'/pages/customer-dashboard.html';
+  }
+
+  const showMsg=(msg,type)=>{
+    const t=document.getElementById('toast');
+    t.textContent=msg;t.className=`toast ${type} show`;
+    setTimeout(()=>t.classList.remove('show'),3000);
+  }
+
+  const handleLogin=async()=>{
+    const phone=document.getElementById('phone').value.trim();
+    const password=document.getElementById('password').value.trim();
+    const btn=document.getElementById('loginBtn');
+    if(!phone||!password){showMsg('Ҳамаи майдонҳоро пур кунед!','error');return}
+    btn.textContent='Интизор шавед...';btn.disabled=true;
+    try{
+      const res=await API.login({phone,password});
+      localStorage.setItem('token',res.token);
+      localStorage.setItem('user',JSON.stringify(res.user));
+      showMsg('✅ Хуш омадед!','success');
+      setTimeout(()=>{
+        window.location.href=res.user.role==='worker'
+          ?'/pages/worker-dashboard.html'
+          :'/pages/customer-dashboard.html';
+      },1000);
+    }catch(err){
+      showMsg(err.message,'error');
+      btn.textContent='Дохил шудан →';btn.disabled=false;
+    }
+  }
+
+  document.addEventListener('keypress',e=>{if(e.key==='Enter')handleLogin()});
+</script>
+</body>
+</html>

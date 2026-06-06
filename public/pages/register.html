@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Рӯйхат шудан — Корбор</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    body{font-family:'Inter',sans-serif;min-height:100vh;background:#F5F5FF;overflow-x:hidden}
+
+    .top-bar{
+      background:linear-gradient(145deg,#0F0C29,#302B63);
+      padding:50px 24px 70px;position:relative;overflow:hidden;
+    }
+
+    .top-bar::before{
+      content:'';position:absolute;
+      width:250px;height:250px;
+      background:linear-gradient(135deg,#FF6584,#6C63FF);
+      border-radius:50%;opacity:0.15;filter:blur(60px);
+      top:-80px;right:-60px;
+    }
+
+    .back-btn{
+      display:inline-flex;align-items:center;gap:8px;
+      color:rgba(255,255,255,0.7);text-decoration:none;
+      font-size:14px;font-weight:600;
+      position:relative;z-index:2;margin-bottom:28px;
+      transition:color 0.2s;
+    }
+    .back-btn:hover{color:white}
+
+    .top-content{position:relative;z-index:2}
+
+    .logo-small{
+      width:52px;height:52px;
+      background:linear-gradient(135deg,#FF6584,#6C63FF);
+      border-radius:16px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:24px;font-weight:900;color:white;
+      margin-bottom:20px;
+      box-shadow:0 8px 24px rgba(255,101,132,0.4);
+    }
+
+    .top-content h1{font-size:28px;font-weight:800;color:white;margin-bottom:8px}
+    .top-content p{font-size:15px;color:rgba(255,255,255,0.6);font-weight:500}
+
+    .form-card{
+      margin:-36px 16px 30px;
+      background:white;border-radius:28px;
+      padding:32px 24px;
+      box-shadow:0 20px 60px rgba(108,99,255,0.12);
+      position:relative;z-index:10;
+      animation:slideUp 0.5s cubic-bezier(0.4,0,0.2,1) both;
+    }
+
+    @keyframes slideUp{
+      from{opacity:0;transform:translateY(30px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+
+    /* Интихоби рол */
+    .role-label{
+      font-size:12px;font-weight:700;color:#9CA3AF;
+      text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px;
+    }
+
+    .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+
+    .role-card{
+      border:2px solid #F0F0FF;border-radius:16px;
+      padding:18px 14px;text-align:center;cursor:pointer;
+      transition:all 0.3s ease;background:#FAFAFF;
+    }
+
+    .role-card.active{
+      border-color:#6C63FF;
+      background:linear-gradient(135deg,#EEF0FF,#F5F0FF);
+      box-shadow:0 4px 20px rgba(108,99,255,0.15);
+    }
+
+    .role-card .role-emoji{font-size:32px;margin-bottom:10px}
+
+    .role-card .role-title{
+      font-size:14px;font-weight:800;color:#1A1D2E;margin-bottom:4px;
+    }
+
+    .role-card .role-desc{font-size:12px;color:#9CA3AF;font-weight:500}
+
+    .role-card.active .role-title{color:#6C63FF}
+
+    /* Input */
+    .input-group{margin-bottom:16px}
+
+    .input-group label{
+      display:block;font-size:12px;font-weight:700;
+      color:#9CA3AF;text-transform:uppercase;
+      letter-spacing:0.8px;margin-bottom:8px;
+    }
+
+    .input-wrap{position:relative}
+
+    .input-icon{
+      position:absolute;left:16px;top:50%;
+      transform:translateY(-50%);font-size:18px;
+    }
+
+    .input-wrap input,
+    .input-wrap select{
+      width:100%;padding:16px 16px 16px 48px;
+      border:2px solid #F0F0FF;border-radius:14px;
+      font-size:15px;font-weight:500;color:#1A1D2E;
+      font-family:'Inter',sans-serif;outline:none;
+      background:#FAFAFF;transition:all 0.3s ease;
+      appearance:none;-webkit-appearance:none;
+    }
+
+    .input-wrap input:focus,
+    .input-wrap select:focus{
+      border-color:#6C63FF;background:white;
+      box-shadow:0 0 0 4px rgba(108,99,255,0.1);
+    }
+
+    .input-wrap input::placeholder{color:#C4C9D4;font-weight:400}
+
+    .btn-register{
+      width:100%;padding:17px;
+      background:linear-gradient(135deg,#6C63FF,#8B5CF6);
+      color:white;border:none;border-radius:14px;
+      font-size:16px;font-weight:700;cursor:pointer;
+      font-family:'Inter',sans-serif;
+      box-shadow:0 8px 24px rgba(108,99,255,0.4);
+      transition:all 0.3s ease;margin-top:8px;
+    }
+
+    .btn-register:hover{
+      transform:translateY(-2px);
+      box-shadow:0 12px 32px rgba(108,99,255,0.5);
+    }
+
+    .btn-register:disabled{opacity:0.7;transform:none}
+
+    .login-text{
+      text-align:center;margin-top:20px;
+      font-size:14px;color:#9CA3AF;font-weight:500;
+    }
+
+    .login-text a{
+      color:#6C63FF;font-weight:700;text-decoration:none;
+    }
+
+    .toast{
+      position:fixed;bottom:30px;left:50%;
+      transform:translateX(-50%) translateY(20px);
+      padding:14px 24px;border-radius:14px;
+      font-size:14px;font-weight:600;color:white;
+      opacity:0;transition:all 0.3s ease;z-index:999;
+      white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,0.2);
+      font-family:'Inter',sans-serif;
+    }
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .toast.success{background:linear-gradient(135deg,#10B981,#059669)}
+    .toast.error{background:linear-gradient(135deg,#EF4444,#DC2626)}
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="/" class="back-btn">← Орқа</a>
+  <div class="top-content">
+    <div class="logo-small">К</div>
+    <h1>Рӯйхат шудан 🎉</h1>
+    <p>Акаунти нав созед ва оғоз кунед</p>
+  </div>
+</div>
+
+<div class="form-card">
+
+  <!-- Интихоби рол -->
+  <div class="role-label">Шумо кӣ ҳастед?</div>
+  <div class="role-grid">
+    <div class="role-card active" onclick="selectRole('customer',this)">
+      <div class="role-emoji">🏢</div>
+      <div class="role-title">Фармоишгар</div>
+      <div class="role-desc">Усто ёфтан</div>
+    </div>
+    <div class="role-card" onclick="selectRole('worker',this)">
+      <div class="role-emoji">🔨</div>
+      <div class="role-title">Усто</div>
+      <div class="role-desc">Кор ёфтан</div>
+    </div>
+  </div>
+
+  <div class="input-group">
+    <label>Исми пурра</label>
+    <div class="input-wrap">
+      <span class="input-icon">👤</span>
+      <input type="text" id="name" placeholder="Исм ва насаб"/>
+    </div>
+  </div>
+
+  <div class="input-group">
+    <label>Рақами телефон</label>
+    <div class="input-wrap">
+      <span class="input-icon">📱</span>
+      <input type="tel" id="phone" placeholder="+992 XX XXX XXXX"/>
+    </div>
+  </div>
+
+  <div class="input-group">
+    <label>Минтақа</label>
+    <div class="input-wrap">
+      <span class="input-icon">📍</span>
+      <select id="region">
+        <option value="">Минтақаро интихоб кунед</option>
+        <option>Душанбе</option>
+        <option>Хуҷанд</option>
+        <option>Бохтар</option>
+        <option>Кӯлоб</option>
+        <option>Исфара</option>
+        <option>Конибодом</option>
+        <option>Ӯротеппа</option>
+        <option>Норак</option>
+        <option>Вахш</option>
+        <option>Турсунзода</option>
+        <option>Роғун</option>
+        <option>Файзобод</option>
+        <option>Шаҳринав</option>
+        <option>Ҳисор</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="input-group">
+    <label>Парол</label>
+    <div class="input-wrap">
+      <span class="input-icon">🔒</span>
+      <input type="password" id="password" placeholder="Камаш 6 аломат"/>
+    </div>
+  </div>
+
+  <button class="btn-register" onclick="handleRegister()" id="regBtn">
+    Рӯйхат шудан →
+  </button>
+
+  <div class="login-text">
+    Аллакай акаунт доред?
+    <a href="/pages/login.html">Дохил шавед</a>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/js/api.js"></script>
+<script>
+  let selectedRole='customer';
+
+  const selectRole=(role,el)=>{
+    selectedRole=role;
+    document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  const showMsg=(msg,type)=>{
+    const t=document.getElementById('toast');
+    t.textContent=msg;t.className=`toast ${type} show`;
+    setTimeout(()=>t.classList.remove('show'),3000);
+  }
+
+  const handleRegister=async()=>{
+    const name=document.getElementById('name').value.trim();
+    const phone=document.getElementById('phone').value.trim();
+    const region=document.getElementById('region').value;
+    const password=document.getElementById('password').value.trim();
+    const btn=document.getElementById('regBtn');
+
+    if(!name||!phone||!region||!password){
+      showMsg('Ҳамаи майдонҳоро пур кунед!','error');return;
+    }
+    if(password.length<6){
+      showMsg('Парол камаш 6 аломат бошад!','error');return;
+    }
+
+    btn.textContent='Интизор шавед...';btn.disabled=true;
+
+    try{
+      const res=await API.register({name,phone,password,role:selectedRole,region});
+      localStorage.setItem('token',res.token);
+      localStorage.setItem('user',JSON.stringify(res.user));
+      showMsg('✅ Хуш омадед!','success');
+      setTimeout(()=>{
+        window.location.href=selectedRole==='worker'
+          ?'/pages/worker-dashboard.html'
+          :'/pages/customer-dashboard.html';
+      },1000);
+    }catch(err){
+      showMsg(err.message,'error');
+      btn.textContent='Рӯйхат шудан →';btn.disabled=false;
+    }
+  }
+</script>
+</body>
+</html>

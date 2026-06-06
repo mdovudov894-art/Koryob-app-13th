@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Профили Усто — Корбор</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    .profile-hero {
+      background: linear-gradient(135deg, #064E3B, #059669);
+      padding: 32px 20px 24px;
+      color: white;
+      text-align: center;
+    }
+
+    .profile-avatar {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      font-weight: 800;
+      color: white;
+      margin: 0 auto 16px;
+      border: 3px solid rgba(255,255,255,0.4);
+      overflow: hidden;
+    }
+
+    .profile-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .profile-name {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .profile-region {
+      font-size: 14px;
+      opacity: 0.85;
+      margin-bottom: 16px;
+    }
+
+    .profile-stats {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+    }
+
+    .profile-stat {
+      text-align: center;
+    }
+
+    .profile-stat-num {
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .profile-stat-label {
+      font-size: 12px;
+      opacity: 0.8;
+      margin-top: 2px;
+    }
+
+    .section-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .section-card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      color: var(--text);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .price-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .price-item:last-child {
+      border-bottom: none;
+    }
+
+    .price-service {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .price-value {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .portfolio-grid img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .review-item {
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .review-item:last-child {
+      border-bottom: none;
+    }
+
+    .review-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .review-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .review-name {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .review-stars {
+      color: #F59E0B;
+      font-size: 14px;
+      margin-left: auto;
+    }
+
+    .review-text {
+      font-size: 14px;
+      color: var(--text-light);
+      line-height: 1.6;
+    }
+
+    .review-photo {
+      margin-top: 10px;
+      width: 100%;
+      border-radius: 10px;
+      max-height: 200px;
+      object-fit: cover;
+    }
+
+    .action-buttons {
+      position: sticky;
+      bottom: 0;
+      background: var(--card);
+      padding: 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+      z-index: 50;
+    }
+
+    .categories-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .category-chip {
+      background: #EFF6FF;
+      color: var(--primary);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="page-header">
+  <a href="javascript:history.back()"
+    style="text-decoration:none;color:var(--text);">←</a>
+  <h1>Профили Усто</h1>
+</div>
+
+<!-- МАЗМУН -->
+<div id="content">
+  <div class="loading" style="margin-top:60px;">
+    <div class="spinner"></div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+  if (!isLoggedIn()) window.location.href = '/';
+  const user = getUser();
+
+  const workerId = new URLSearchParams(window.location.search).get('id');
+  if (!workerId) window.location.href = '/';
+
+  let workerData = null;
+  let reviewsData = [];
+
+  const loadWorker = async () => {
+    try {
+      const workers = await API.getAllWorkers();
+      workerData = workers.find(w => w.user._id === workerId);
+
+      if (!workerData) {
+        document.getElementById('content').innerHTML =
+          '<div class="empty-state"><h3>Усто ёфт нашуд</h3></div>';
+        return;
+      }
+
+      reviewsData = await API.getWorkerReviews(workerId);
+      renderProfile();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
+  const renderProfile = () => {
+    const w = workerData;
+    const isCustomer = user.role === 'customer';
+
+    let html = `
+      <!-- ГЕРОЙ -->
+      <div class="profile-hero">
+        <div class="profile-avatar">
+          ${w.user.avatar
+            ? `<img src="${w.user.avatar}" />`
+            : w.user.name.charAt(0)}
+        </div>
+        <div class="profile-name">${w.user.name}</div>
+        <div class="profile-region">📍 ${w.user.region}</div>
+        <div class="profile-stats">
+          <div class="profile-stat">
+            <div class="profile-stat-num">
+              ${w.rating ? w.rating.toFixed(1) : '0.0'}
+            </div>
+            <div class="profile-stat-label">Рейтинг</div>
+          </div>
+          <div class="profile-stat">
+            <div class="profile-stat-num">${w.reviewCount || 0}</div>
+            <div class="profile-stat-label">Отзыв</div>
+          </div>
+          <div class="profile-stat">
+            <div class="profile-stat-num">${w.categories.length}</div>
+            <div class="profile-stat-label">Хизмат</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:20px 16px 100px;">
+
+        <!-- СТАТУС -->
+        <div style="text-align:center;margin-bottom:16px;">
+          <span class="status-badge"
+            style="background:${w.status === 'Озод' ? '#DCFCE7' : '#FEE2E2'};
+            color:${w.status === 'Озод' ? '#16A34A' : '#DC2626'};">
+            ${w.status === 'Озод' ? '🟢 Ҳозир озод' : '🔴 Ҳозир банд'}
+          </span>
+        </div>
+
+        <!-- БИО -->
+        ${w.bio ? `
+          <div class="section-card">
+            <h3>👤 Дар бораи худ</h3>
+            <p style="font-size:15px;line-height:1.7;color:var(--text-light);">
+              ${w.bio}
+            </p>
+          </div>` : ''}
+
+        <!-- КАТЕГОРИЯҲО -->
+        <div class="section-card">
+          <h3>🔨 Хизматрасониҳо</h3>
+          <div class="categories-wrap">
+            ${w.categories.map(c =>
+              `<span class="category-chip">${c}</span>`
+            ).join('')}
+          </div>
+        </div>
+
+        <!-- ПРАЙС-ЛИСТ -->
+        ${w.priceList && w.priceList.length > 0 ? `
+          <div class="section-card">
+            <h3>💰 Нархҳо</h3>
+            ${w.priceList.map(p => `
+              <div class="price-item">
+                <span class="price-service">${p.service}</span>
+                <span class="price-value">${p.price}</span>
+              </div>
+            `).join('')}
+          </div>` : ''}
+
+        <!-- ПОРТФОЛИО -->
+        ${w.portfolio && w.portfolio.length > 0 ? `
+          <div class="section-card">
+            <h3>🖼️ Портфолио</h3>
+            <div class="portfolio-grid">
+              ${w.portfolio.map(img => `
+                <img src="${img}" onclick="window.open('${img}')" />
+              `).join('')}
+            </div>
+          </div>` : ''}
+
+        <!-- ОТЗЫВҲО -->
+        <div class="section-card">
+          <h3>⭐ Отзывҳо (${reviewsData.length})</h3>
+          ${reviewsData.length === 0
+            ? '<p style="color:var(--text-light);text-align:center;">Отзывҳо нест</p>'
+            : reviewsData.map(r => `
+              <div class="review-item">
+                <div class="review-top">
+                  <div class="review-avatar">${r.customer.name.charAt(0)}</div>
+                  <div>
+                    <div class="review-name">${r.customer.name}</div>
+                  </div>
+                  <div class="review-stars">${'★'.repeat(r.stars)}${'☆'.repeat(5 - r.stars)}</div>
+                </div>
+                ${r.comment
+                  ? `<p class="review-text">${r.comment}</p>` : ''}
+                ${r.photo
+                  ? `<img src="${r.photo}" class="review-photo" />` : ''}
+              </div>
+            `).join('')}
+        </div>
+
+      </div>`;
+
+    // Тугмачаҳои поён (танҳо барои фармоишгарон)
+    if (isCustomer) {
+      html += `
+        <div class="action-buttons">
+          <a href="/pages/create-order.html"
+            class="btn btn-outline" style="flex:1;">
+            📋 Фармоиш додан
+          </a>
+        </div>`;
+    }
+
+    document.getElementById('content').innerHTML = html;
+  };
+
+  loadWorker();
+</script>
+
+</body>
+</html>

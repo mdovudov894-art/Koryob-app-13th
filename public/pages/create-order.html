@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Фармоиш додан — Корбор</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    .upload-area {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+      background: var(--bg);
+    }
+
+    .upload-area:hover {
+      border-color: var(--primary);
+      background: #EFF6FF;
+    }
+
+    .upload-area p {
+      font-size: 14px;
+      color: var(--text-light);
+      margin-top: 8px;
+    }
+
+    .upload-icon {
+      font-size: 36px;
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .preview-img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="page-header">
+  <a href="/pages/customer-dashboard.html" style="text-decoration:none; color:var(--text);">
+    ← 
+  </a>
+  <h1>Фармоиш додан</h1>
+</div>
+
+<div class="page-content">
+  <div class="card">
+
+    <div class="form-group">
+      <label>Категорияи кор</label>
+      <select id="category">
+        <option value="">Интихоб кунед</option>
+        <option value="Кафел">🟦 Кафел</option>
+        <option value="Шкатур">🪚 Шкатур</option>
+        <option value="Сантехника">🚿 Сантехника</option>
+        <option value="Барқ">⚡ Барқ</option>
+        <option value="Гаҷкорӣ">🏗️ Гаҷкорӣ</option>
+        <option value="Рангкорӣ">🎨 Рангкорӣ</option>
+        <option value="Дарпеча">🪟 Дарпеча</option>
+        <option value="Фаршкорӣ">🏠 Фаршкорӣ</option>
+        <option value="Болопӯш">🏚️ Болопӯш</option>
+        <option value="Стяжка">🧱 Стяжка</option>
+        <option value="Дигар">🔧 Дигар</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Тавсифи муфассал</label>
+      <textarea id="description"
+        placeholder="Масалан: Ошхонаро кафел кардан лозим, 20 метри мураббаъ..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Суроғаи дақиқ</label>
+      <input type="text" id="address"
+        placeholder="Масалан: Душанбе, кӯчаи Рӯдакӣ 15" />
+    </div>
+
+    <div class="form-group">
+      <label>Мӯҳлат</label>
+      <input type="text" id="deadline"
+        placeholder="Масалан: 3 рӯз, 1 ҳафта..." />
+    </div>
+
+    <div class="form-group">
+      <label>Нархи пешниҳодӣ (ихтиёрӣ)</label>
+      <input type="text" id="budget"
+        placeholder="Масалан: 500 сомонӣ ё Музокира" />
+    </div>
+
+    <div class="form-group">
+      <label>Суратҳои объект (ихтиёрӣ)</label>
+      <div class="upload-area" onclick="document.getElementById('images').click()">
+        <div class="upload-icon">📸</div>
+        <p>Суратҳои деворро монед</p>
+      </div>
+      <input type="file" id="images" multiple accept="image/*"
+        style="display:none" onchange="previewImages(this)" />
+      <div class="preview-grid" id="previewGrid"></div>
+    </div>
+
+    <button class="btn btn-primary" onclick="handleCreateOrder()" id="submitBtn">
+      📋 Эълон гузоштан
+    </button>
+
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+  if (!isLoggedIn()) window.location.href = '/';
+  const user = getUser();
+  if (user.role !== 'customer') window.location.href = '/pages/worker-dashboard.html';
+
+  const previewImages = (input) => {
+    const grid = document.getElementById('previewGrid');
+    grid.innerHTML = '';
+    Array.from(input.files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.className = 'preview-img';
+        grid.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleCreateOrder = async () => {
+    const category = document.getElementById('category').value;
+    const description = document.getElementById('description').value.trim();
+    const address = document.getElementById('address').value.trim();
+    const deadline = document.getElementById('deadline').value.trim();
+    const budget = document.getElementById('budget').value.trim();
+    const images = document.getElementById('images').files;
+    const btn = document.getElementById('submitBtn');
+
+    if (!category || !description || !address || !deadline) {
+      showToast('Майдонҳои ҳатмиро пур кунед!', 'error');
+      return;
+    }
+
+    btn.textContent = 'Интизор шавед...';
+    btn.disabled = true;
+
+    try {
+      const formData = new FormData();
+      formData.append('category', category);
+      formData.append('description', description);
+      formData.append('address', address);
+      formData.append('deadline', deadline);
+      formData.append('budget', budget || 'Музокира карда мешавад');
+      Array.from(images).forEach(img => formData.append('images', img));
+
+      await API.createOrder(formData);
+      showToast('✅ Фармоиш гузошта шуд!', 'success');
+
+      setTimeout(() => {
+        window.location.href = '/pages/my-orders.html';
+      }, 1000);
+    } catch (err) {
+      showToast(err.message, 'error');
+      btn.textContent = '📋 Эълон гузоштан';
+      btn.disabled = false;
+    }
+  };
+</script>
+
+</body>
+</html>

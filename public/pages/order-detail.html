@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Фармоиш — Корбор</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    .order-hero {
+      background: linear-gradient(135deg, #1E3A8A, #2563EB);
+      padding: 20px;
+      color: white;
+    }
+
+    .order-hero h2 {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .order-hero-meta {
+      display: flex;
+      gap: 12px;
+      font-size: 13px;
+      opacity: 0.85;
+      flex-wrap: wrap;
+    }
+
+    .info-card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .info-card h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .images-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .images-grid img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .response-card {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+      border: 2px solid var(--border);
+      transition: var(--transition);
+    }
+
+    .response-card.selected {
+      border-color: var(--success);
+      background: #F0FDF4;
+    }
+
+    .response-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .response-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .response-name {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .response-meta {
+      display: flex;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--text-light);
+      margin-bottom: 8px;
+    }
+
+    .response-msg {
+      font-size: 14px;
+      color: var(--text);
+      background: var(--card);
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .response-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .btn-sm {
+      padding: 8px 16px;
+      font-size: 13px;
+      border-radius: 10px;
+      width: auto;
+    }
+
+    .respond-form {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+    }
+
+    .respond-form h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .respond-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .worker-assigned {
+      background: #F0FDF4;
+      border: 2px solid var(--success);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .worker-assigned-icon { font-size: 32px; }
+
+    .worker-assigned h4 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #16A34A;
+    }
+
+    .worker-assigned p {
+      font-size: 13px;
+      color: var(--text-light);
+    }
+  </style>
+</head>
+<body>
+
+<div id="content">
+  <div class="loading" style="margin-top:40px;">
+    <div class="spinner"></div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+  if (!isLoggedIn()) window.location.href = '/';
+  const user = getUser();
+
+  const orderId = new URLSearchParams(window.location.search).get('id');
+  if (!orderId) window.location.href = '/';
+
+  let order = null;
+
+  const loadOrder = async () => {
+    try {
+      order = await API.getOrderById(orderId);
+      renderOrder();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
+  const renderOrder = () => {
+    const isCustomer = user.role === 'customer';
+    const isOwner = isCustomer && order.customer._id === user.id;
+    const hasResponded = order.responses.some(r => r.worker._id === user.id);
+    const isAssigned = order.assignedWorker && order.assignedWorker._id === user.id;
+
+    let html = `
+      <div class="order-hero">
+        <div style="display:flex;align-items:center;
+          justify-content:space-between;margin-bottom:12px;">
+          <a href="javascript:history.back()"
+            style="color:white;font-size:13px;text-decoration:none;">← Ба акиб</a>
+          <span class="badge ${order.status === 'Актив' ? 'badge-success' :
+            order.status === 'Иҷрошуда' ? 'badge-primary' : 'badge-danger'}">
+            ${order.status}
+          </span>
+        </div>
+        <h2>${order.category}</h2>
+        <div class="order-hero-meta">
+          <span>📍 ${order.address}</span>
+          <span>⏰ ${order.deadline}</span>
+          <span>💰 ${order.budget}</span>
+        </div>
+      </div>
+
+      <div class="page-content">
+
+        <div class="info-card">
+          <h3>Тавсиф</h3>
+          <p style="font-size:15px;line-height:1.7;">${order.description}</p>
+        </div>
+
+        <div class="info-card">
+          <h3>Фармоишгар</h3>
+          <div class="response-top">
+            <div class="response-avatar">
+              ${order.customer.name.charAt(0)}
+            </div>
+            <div>
+              <div class="response-name">${order.customer.name}</div>
+              <div style="font-size:13px;color:var(--text-light);">
+                📍 ${order.customer.region}
+              </div>
+            </div>
+          </div>
+        </div>`;
+
+    if (order.images && order.images.length > 0) {
+      html += `
+        <div class="info-card">
+          <h3>Суратҳои объект</h3>
+          <div class="images-grid">
+            ${order.images.map(img =>
+              `<img src="${img}" onclick="window.open('${img}')" />`
+            ).join('')}
+          </div>
+        </div>`;
+    }
+
+    if (order.assignedWorker) {
+      html += `
+        <div class="worker-assigned">
+          <div class="worker-assigned-icon">✅</div>
+          <div>
+            <h4>Усто тасдиқшуд</h4>
+            <p>${order.assignedWorker.name}</p>
+          </div>
+          <a href="/pages/chat.html?orderId=${order._id}&userId=${order.assignedWorker._id}"
+            class="btn btn-primary btn-sm" style="margin-left:auto;">
+            💬 Чат
+          </a>
+        </div>`;
+    }
+
+    if (isOwner && order.status === 'Актив' && order.assignedWorker) {
+      html += `
+        <button class="btn btn-secondary" onclick="handleClose()"
+          style="margin-bottom:16px;">
+          ✅ Кор иҷро шуд
+        </button>`;
+    }
+
+    if (isOwner && order.status === 'Иҷрошуда') {
+      html += `
+        <a href="/pages/leave-review.html?workerId=${order.assignedWorker._id}
+          &orderId=${order._id}
+          &workerName=${encodeURIComponent(order.assignedWorker.name)}
+          &category=${encodeURIComponent(order.category)}"
+          class="btn btn-primary" style="margin-bottom:16px;">
+          ⭐ Баҳо гузоштан
+        </a>`;
+    }
+
+    if (isOwner && order.responses.length > 0) {
+      html += `
+        <div class="info-card">
+          <h3>Откликҳо (${order.responses.length})</h3>
+          ${order.responses.map(r => `
+            <div class="response-card ${order.assignedWorker &&
+              order.assignedWorker._id === r.worker._id ? 'selected' : ''}">
+              <div class="response-top">
+                <div class="response-avatar">${r.worker.name.charAt(0)}</div>
+                <div>
+                  <div class="response-name">${r.worker.name}</div>
+                </div>
+              </div>
+              <div class="response-meta">
+                <span>💰 ${r.price}</span>
+                <span>⏰ ${r.deadline}</span>
+              </div>
+              ${r.message
+                ? `<div class="response-msg">${r.message}</div>` : ''}
+              <div class="response-actions">
+                <a href="/pages/worker-public.html?id=${r.worker._id}"
+                  class="btn btn-outline btn-sm">👤 Профил</a>
+                ${!order.assignedWorker && order.status === 'Актив' ? `
+                  <button class="btn btn-primary btn-sm"
+                    onclick="handleAssign('${r.worker._id}')">
+                    ✅ Интихоб кардан
+                  </button>` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>`;
+    }
+
+    if (!isCustomer && order.status === 'Актив' && !hasResponded) {
+      html += `
+        <div class="respond-form">
+          <h3>✍️ Отклик фиристодан</h3>
+          <div class="respond-row">
+            <div class="form-group">
+              <label>Нархи шумо</label>
+              <input type="text" id="respPrice" placeholder="500 сомонӣ" />
+            </div>
+            <div class="form-group">
+              <label>Мӯҳлат</label>
+              <input type="text" id="respDeadline" placeholder="2 рӯз" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Паём (ихтиёрӣ)</label>
+            <textarea id="respMessage"
+              placeholder="Таҷрибаи кор..."></textarea>
+          </div>
+          <button class="btn btn-primary" onclick="handleRespond()">
+            📤 Отклик фиристодан
+          </button>
+        </div>`;
+    }
+
+    if (!isCustomer && hasResponded) {
+      html += `
+        <div class="info-card" style="text-align:center;color:var(--success);">
+          <p style="font-size:16px;">✅ Шумо аллакай отклик фиристодед!</p>
+          ${isAssigned ? `
+            <a href="/pages/chat.html?orderId=${order._id}&userId=${order.customer._id}"
+              class="btn btn-primary" style="margin-top:12px;">
+              💬 Чат бо фармоишгар
+            </a>` : ''}
+        </div>`;
+    }
+
+    html += `</div>`;
+    document.getElementById('content').innerHTML = html;
+  };
+
+  const handleRespond = async () => {
+    const price = document.getElementById('respPrice').value.trim();
+    const deadline = document.getElementById('respDeadline').value.trim();
+    const message = document.getElementById('respMessage').value.trim();
+
+    if (!price || !deadline) {
+      showToast('Нарх ва мӯҳлатро ворид кунед!', 'error');
+      return;
+    }
+
+    try {
+      await API.respondToOrder(orderId, { price, deadline, message });
+      showToast('✅ Отклик фиристода шуд!', 'success');
+      setTimeout(() => loadOrder(), 1000);
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
+  const handleAssign = async (workerId) => {
+    try {
+      await API.assignWorker(orderId, { workerId });
+      showToast('✅ Усто тасдиқ шуд!', 'success');
+      setTimeout(() => loadOrder(), 1000);
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
+  const handleClose = async () => {
+    if (!confirm('Корро иҷрошуда нишон медиҳед?')) return;
+    try {
+      await API.closeOrder(orderId);
+      showToast('✅ Фармоиш иҷрошуда!', 'success');
+      setTimeout(() => {
+        window.location.href =
+          `/pages/leave-review.html?workerId=${order.assignedWorker._id}` +
+          `&orderId=${orderId}` +
+          `&workerName=${encodeURIComponent(order.assignedWorker.name)}` +
+          `&category=${encodeURIComponent(order.category)}`;
+      }, 1000);
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
+  loadOrder();
+</script>
+
+</body>
+</html>
